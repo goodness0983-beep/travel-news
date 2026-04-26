@@ -1,0 +1,29 @@
+name: 每日更新旅遊新聞
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安裝套件
+        run: pip install feedparser requests
+
+      - name: 執行爬蟲
+        run: python fetch.py
+
+      - name: 推送更新
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --staged --quiet || git commit -m "自動更新：$(date '+%Y-%m-%d %H:%M') 台灣時間"
+          git push
